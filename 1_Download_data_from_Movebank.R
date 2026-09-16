@@ -115,8 +115,8 @@ library(R.utils)
 options("move2_movebank_key_name" = "movebank")
 
 pathTOfolder <- "./MBdata/"
-dir.create(paste0(pathTOfolder,"1.MB_indv_mv2"))
-pthDownld <- paste0(pathTOfolder,"1.MB_indv_mv2/")
+dir.create(paste0(pathTOfolder,"01_MB_indv_mv2"))
+pthDownld <- paste0(pathTOfolder,"01_MB_indv_mv2/")
 
 ### studies to download
 allstudies <- readRDS(paste0(pathTOfolder,"full_table_all_studies.rds"))
@@ -194,9 +194,9 @@ library(dplyr)
 # library(dplyr)
 
 pathTOfolder <- "./MBdata/"
-pthDownld <- paste0(pathTOfolder,"1.MB_indv_mv2/")
-dir.create(paste0(pathTOfolder,"2.MB_indv_mv2_clean"))
-pthClean <- paste0(pathTOfolder,"2.MB_indv_mv2_clean/")
+pthDownld <- paste0(pathTOfolder,"01_MB_indv_mv2/")
+dir.create(paste0(pathTOfolder,"02_MB_indv_mv2_clean"))
+pthClean <- paste0(pathTOfolder,"02_MB_indv_mv2_clean/")
 
 flsMV <- list.files(pthDownld, full.names = F)
 done <- list.files(pthClean, full.names = F) #checking which have been already done in case an error occurs and script stops
