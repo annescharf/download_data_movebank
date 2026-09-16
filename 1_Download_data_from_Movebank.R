@@ -1,7 +1,9 @@
 ## Title: Download data of multiple studies from Movebank
 ## Author: Anne K Scharf, MPI of Animal Behavior
-## Date: February 2025
-## Description: this script has 3 steps:
+## Date: September 2026
+## Description: this script is developed to download hundreds of studies, but of 
+##              course it also works just for one or a few studies
+##  This script has 3 steps:
 ##    1. creates table of studies to be downloaded. In this example studies 
 ##        from a given movebank user and all studies with license "CC_0","CC_BY" 
 ##        & "CC_BY_NC" are downloaded. This table can also be filtered by taxon 
@@ -21,12 +23,19 @@
 ##    doubt if and how you can use the data for your own work, please 
 ##    get in touch with the contact person of the study.
 
+## OUTPUT:
+## Step 1: - `full_table_all_studies.rds`: table containing all studies to download (one row per study)
+##         - `metadata_all_studies.rds`: table containing the metadata, including license and contact per study
+## Step 2: - one folder containing one .rds file per individual downloaded
+## Step 3: - one folder containing one .rds file per individual downloaded. File names are the same as in step 2, but they are placed              in a new folder with an intuitive name to identify the content
+
+
 #######-----------------------------########
 ## 1. create table of studies to download ##
 #######-----------------------------########
 ### gathers all studies to download, 
 ### those shared with the specific movebank user 
-### and those that are publicly available
+### and/or those that are publicly available
 ### metadata table is created and saved including study name, 
 ### owner, license terms, download date, etc
 
@@ -45,13 +54,15 @@ pathTOfolder <- "./MBdata/"
 #### downloading studies to which the user "XXXX" has been added as collaborator or manager
 # download list of studies available through this account
 all_shared <- movebank_download_study_info(study_permission=c("data_manager","collaborator"))
+## here you can also filter the table as below
 
 ### searching for public studies
 all <- movebank_download_study_info() # some studies have years in weird formats, just ignore this warning message
-all <- all[grep("GPS", all$sensor_type_ids),] # studies can have multiple sensors, making sure gps is included
+all <- all[grep("GPS", all$sensor_type_ids),] # studies can have multiple sensors, making sure gps is included, adjust as needed
 all <- all[all$number_of_deployed_locations > units::set_units(0,"count"),] # removing those with 0 locations
 all <- all[!is.na(all$number_of_deployed_locations),] # removing those with no deployed locations
 all <- all[!is.na(all$taxon_ids),] ## removing those with NO taxon
+# all <- all[grep("Ciconia ciconia", all$taxon_ids),] ## selecting only studies that contain species of interest
 all <- all[!all$is_test==T,] ## removing studies marked as tests
 all_open <- all[which(all$license_type %in% c("CC_0","CC_BY","CC_BY_NC")),] 
 ## - CC_O: can use the data, do not need to mention names
@@ -82,7 +93,7 @@ metadata_studies <- allstudies[,c(
   "download_date"
 )]
 saveRDS(metadata_studies, paste0(pathTOfolder,"metadata_all_studies.rds"))
-
+## ensure to inspect this table before using the data to comply with all license terms
 
 ######-----------------------#######
 ## 2. download data by individual ##
@@ -128,6 +139,7 @@ results <- lapply(Ids_toDo, function(studyId)try({
   })
   
   reftb <- reftb[reftb$number_of_events > units::set_units(0,"count"),]
+  ## when you are interested in the data of one specific species, you might want to filter again here for the species. Some studies on Movebank contain multiple studies. This way you can ensure to only download your species of interest.
   
   ## intuitively one would use "individual_local_identifier" problem is: it sometimes does not exist, names often contains symbols that mess with R like e.g. "/". The "individual_id" is an internal number not visible on the webpage, it is also consistent unless the study gets deleted and uploaded again. When downloading many individuals, this is the safest option
   reftb$pthName <- paste0(studyId,"_",reftb$individual_id,".rds")
@@ -146,7 +158,7 @@ results <- lapply(Ids_toDo, function(studyId)try({
     print(paste0(studyId,"_",ind))
     mv2 <- movebank_download_study(studyId,
                                    sensor_type_id=c("gps"),                                                                         
-                                   individual_id=ind,                                                                       
+                                   individual_id=ind, 
                                    attributes = c("individual_local_identifier","deployment_id"), ## here only lat, lon, time, and the stated columns are downloaded. 
                                    # attributes="all", if all attributes should be downloaded, use this argument instead
                                    timestamp_end=as.POSIXct(Sys.time(), tz="UTC")) # to avoid locations in the future
@@ -222,3 +234,4 @@ lapply(flsMV, function(indPth){
 # } ,.parallel = T)
 end_time <- Sys.time()
 end_time - start_time # 
+
