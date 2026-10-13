@@ -93,10 +93,6 @@
 
 #____________________________________________________________________________
 
-
-pthDownld <- paste0(pathTOfolder,"01_MB_indv_mv2/")
-dir.create(paste0(pathTOfolder,"02_MB_indv_mv2_clean"))
-pthClean <- paste0(pathTOfolder,"02_MB_indv_mv2_clean/")
 pathTOfolder <- "./MBdata/"
 path_to_rds_folder <- paste0(pathTOfolder,"02_MB_indv_mv2_clean/")   # one move2 object (one individual) per rds file
 path_to_results    <- paste0(pathTOfolder,"03_identifying_duplicate_tracks/")      # tables are written here 
@@ -104,7 +100,7 @@ n_cores            <- 4                                   # works on Linux, macO
 path_to_plots      <- file.path(path_to_results, "duplicatePlots")  # sanity check plots: one folder per species
 path_to_cache      <- file.path(path_to_results, "cache")           # compact copies of the locations (~24 bytes per location), can be deleted afterwards
 
-source("2_Functions_Duplicated_tracks_across_studies.R")
+source("./2_Functions_Duplicated_tracks_across_studies.R")
 for (p in c(path_to_results, path_to_plots, path_to_cache)) dir.create(p, showWarnings = FALSE, recursive = TRUE)
 
 ## Further arguments of find_duplicated_tracks() and their defaults (details at the function):
