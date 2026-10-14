@@ -15,12 +15,12 @@
 ##             information will be flagged here, the column `species` will be NA 
 ##             and these individuals will be ignored in the duplication detection. 
 ##            Advice: add the taxon name to the Movebank study or ask the owner of the study to do so. 
-##  - `duplicated_tracks.csv`: same table as above plus the result of the duplicate 
+##  - `reference_table_all_studies_duplicated_tracks.rds`: same table as above plus the result of the duplicate 
 ##            detection. Used to identify which individuals to keep. 
 ##            keep == FALSE are the files to exclude
 ##  - `duplicated_tracks_pairs.csv`: one row per pair of files that was compared 
 ##            location by location, use the grouping to check borderline cases.
-##  - `duplicated_tracks.rds`: the complete result object of find_duplicated_tracks() 
+##  - `duplicated_tracks_list.rds`: the complete result object of find_duplicated_tracks() 
 ##            that will be used for plot_duplicate_groups(). Can be used to get the 
 ##            duplicated plots without needing to rerun all the code. 
 ##  - `duplicatePlots`: contains one plot per duplicated group, these are organized 
@@ -37,7 +37,7 @@
 ##                                    timestamp_ms, xmin/xmax/ymin/ymax, read_error, no_species. 
 ##                                    The inventory of all files, independent of the duplicate analysis; 
 ##                                    on disk even if a later step fails.
-##  duplicated_tracks.csv            The same table, one row per file, plus the result of the duplicate
+##  reference_table_all_studies_duplicated_tracks.rds            The same table, one row per file, plus the result of the duplicate
 ##                                    detection: dup_group (id of the files belonging to the same
 ##                                    individual, NA = no duplicate found), n_in_group, keep (TRUE = use
 ##                                    this file: best of its group or no duplicate; FALSE = duplicate to
@@ -57,7 +57,7 @@
 ##                                    as share of ALL locations of a / b), dist_med/q90/max_m (distances
 ##                                    of the time-coincident fixes). The evidence behind the grouping;
 ##                                    use it to check borderline cases.
-##  duplicated_tracks.rds            The complete result object of find_duplicated_tracks(): a list
+##  duplicated_tracks_list.rds            The complete result object of find_duplicated_tracks(): a list
 ##                                    with $tracks (= duplicated_tracks.csv as data.table with proper
 ##                                    date/number types), $pairs (= duplicated_tracks_pairs.csv),
 ##                                    $groups (list of the duplicate groups, vector of fileNames each,
@@ -124,9 +124,9 @@ res <- find_duplicated_tracks(files = path_to_rds_folder,
                               cache_dir = path_to_cache,
                               reference_table_file = file.path(path_to_results, "reference_table_all_studies.rds")
                               )
-fwrite(res$tracks, file = file.path(path_to_results, "duplicated_tracks.csv"))        # reference table: dup_group, keep, ...
+saveRDS(res$tracks, file = file.path(path_to_results, "reference_table_all_studies_duplicated_tracks.rds"))        # reference table: dup_group, keep, ...
 fwrite(res$pairs,  file = file.path(path_to_results, "duplicated_tracks_pairs.csv"))  # match statistics of all compared pairs
-saveRDS(res, file = file.path(path_to_results, "duplicated_tracks.rds"))
+saveRDS(res, file = file.path(path_to_results, "duplicated_tracks_list.rds"))
 
 ## Arguments of plot_duplicate_groups() and their defaults:
 ##   species = NULL              plot only these species (NULL = all)

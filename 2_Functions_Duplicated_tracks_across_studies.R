@@ -22,12 +22,12 @@
 ##             information will be flagged here, the column `species` will be NA 
 ##             and these individuals will be ignored in the duplication detection. 
 ##            Advice: add the taxon name to the Movebank study or ask the owner of the study to do so. 
-##  - `duplicated_tracks.csv`: same table as above plus the result of the duplicate 
+##  - `reference_table_all_studies_duplicated_tracks.rds`: same table as above plus the result of the duplicate 
 ##            detection. Used to identify which individuals to keep. 
 ##            keep == FALSE are the files to exclude
 ##  - `duplicated_tracks_pairs.csv`: one row per pair of files that was compared 
 ##            location by location, use the grouping to check borderline cases.
-##  - `duplicated_tracks.rds`: the complete result object of find_duplicated_tracks() 
+##  - `duplicated_tracks_list.rds`: the complete result object of find_duplicated_tracks() 
 ##            that will be used for plot_duplicate_groups(). Can be used to get the 
 ##            duplicated plots without needing to rerun all the code
 ##  - `duplicatePlots`: contains one plot per duplicated group, these are organized 
