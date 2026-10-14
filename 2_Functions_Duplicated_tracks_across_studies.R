@@ -79,8 +79,14 @@ library(data.table)
 # (time-zone independent), lon, lat; sorted by time, exact duplicate rows
 # removed. All tracks of the file (an individual with several tags/deployments)
 # are pooled. Returns the table with the move2 object's track data, number of
-# rows and number of tracks as attributes.
-read_track_locations <- function(path) {
+# rows and number of tracks as attributes, plus "event_data": the unique values of
+# those attr_cols that are stored with the events rather than in the track data.
+# Which columns are track or event attributes depends on the track id column of the
+# file (e.g. setting it to deployment_id moves individual_local_identifier to the
+# events), so the attributes are found wherever they are.
+read_track_locations <- function(path,
+                                 attr_cols = c("study_id", "individual_local_identifier", "tag_local_identifier", "tag_id",
+                                               "taxon_canonical_name", "animal_life_stage", "manipulation_type")) {
   m <- readRDS(path)
   if (!inherits(m, "move2")) stop("Not a move2 object: ", path)
   # Work on the coordinate matrix, never subset the move2 object (very slow for
@@ -97,7 +103,10 @@ read_track_locations <- function(path) {
   }
   loc <- unique(data.table(t = as.numeric(tt)[ok], x = xy[ok, 1], y = xy[ok, 2]))
   setkey(loc, t)
-  setattr(loc, "track_data", mt_track_data(m))
+  td <- mt_track_data(m)
+  ev_cols <- setdiff(intersect(attr_cols, names(m)), names(td))
+  setattr(loc, "track_data", td)
+  setattr(loc, "event_data", lapply(X = setNames(nm = ev_cols), FUN = function(col) unique(m[[col]])))
   setattr(loc, "n_locs", nrow(m))
   setattr(loc, "n_tracks", mt_n_tracks(m))
   loc
@@ -123,11 +132,13 @@ extract_track_info <- function(path, cache_dir, prescreen_cell_deg = 0.01) {
   n_locs <- attr(loc, "n_locs")
   n_tracks <- attr(loc, "n_tracks")
   td <- attr(loc, "track_data")
-  # track attribute as character: NA when the column is missing or holds only
+  ed <- attr(loc, "event_data")
+  # track attribute as character, taken from the track data or, when it is not
+  # there, from the events: NA when the column is missing or holds only
   # NA/empty values; several distinct values (deployments) joined with ";"
   attr_chr <- function(col) {
-    if (!col %in% names(td)) return(NA_character_)
-    v <- unique(as.character(td[[col]]))
+    v <- if (col %in% names(td)) td[[col]] else if (col %in% names(ed)) ed[[col]] else return(NA_character_)
+    v <- unique(as.character(v))
     v <- v[!is.na(v) & v != ""]
     if (length(v) == 0) NA_character_ else paste(v, collapse = ";")
   }
